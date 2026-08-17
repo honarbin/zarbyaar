@@ -1,0 +1,6 @@
+{
+  "name": "ضربیار",
+  "description": "اپلیکیشن آموزشی و بازی‌محور یادگیری جدول ضرب برای کودکان",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
