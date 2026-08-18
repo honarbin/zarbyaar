@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -32,18 +33,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'zulu'
+          distribution: 'temurin'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Add Android Platform (Capacitor)
-        run: |
-          npx cap add android
-
       - name: Sync Capacitor Projects
-        run: |
-          npx cap sync android
+        run: npx cap sync android
 
       - name: Build Android Debug APK
         run: |
@@ -54,6 +50,6 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zarbiyar-apk
+          name: zarbiyar-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
