@@ -116,11 +116,9 @@ export const getTraditionalPersianMultiplicationPhrase = (f1: number, f2: number
 // Web Audio API & Cross-Platform Sound & Speech Engine (Zero Latency, Offline Ready)
 class SoundEffects {
   private audioCtx: AudioContext | null = null;
-  private currentAudio: HTMLAudioElement | null = null;
   private currentPlayingId: string | null = null;
   private listeners: Set<() => void> = new Set();
   private isUnlocked: boolean = false;
-  private audioCache: Map<string, HTMLAudioElement> = new Map();
 
   private voiceVolume: number = 1.0;
   private sfxVolume: number = 1.0;
@@ -183,16 +181,6 @@ class SoundEffects {
   }
 
   public stopSpeech() {
-    if (this.currentAudio) {
-      try {
-        this.currentAudio.pause();
-        this.currentAudio.currentTime = 0;
-      } catch {
-        // ignore
-      }
-      this.currentAudio = null;
-    }
-
     this.currentPlayingId = null;
     this.notify();
   }
@@ -211,75 +199,8 @@ class SoundEffects {
     return this.audioCtx;
   }
 
-  // Preload helper (only for core multiplication tables if desired)
   public preloadKeyAudio() {
-    // Web Audio SFX are instant and require zero network preloading!
-  }
-
-  // Helper to play an MP3 path cleanly with ID and volume controls (used for learning tables)
-  private playMp3File(mp3Path: string, id: string, volume: number = 1.0, onEndedCallback?: () => void): void {
-    if (!this.soundEnabled) return;
-    this.unlockAudioContext();
-
-    // Stop current playing audio
-    this.stopSpeech();
-
-    this.currentPlayingId = id;
-    this.notify();
-
-    try {
-      let audio = this.audioCache.get(mp3Path);
-      if (!audio) {
-        audio = new Audio(mp3Path);
-        this.audioCache.set(mp3Path, audio);
-      } else {
-        try {
-          audio.pause();
-          audio.currentTime = 0;
-        } catch {
-          // ignore
-        }
-      }
-
-      audio.volume = Math.max(0, Math.min(1, volume));
-      this.currentAudio = audio;
-
-      audio.onended = () => {
-        if (this.currentPlayingId === id) {
-          this.currentPlayingId = null;
-          this.currentAudio = null;
-          this.notify();
-        }
-        if (onEndedCallback) onEndedCallback();
-      };
-
-      audio.onerror = (e) => {
-        const err = audio?.error;
-        console.warn(`[Zarbyar Audio] اطلاعات فایل صوتی: ${mp3Path}`, err?.message);
-        if (this.currentPlayingId === id) {
-          this.currentPlayingId = null;
-          this.currentAudio = null;
-          this.notify();
-        }
-      };
-
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          if (this.currentPlayingId === id) {
-            this.currentPlayingId = null;
-            this.currentAudio = null;
-            this.notify();
-          }
-        });
-      }
-    } catch {
-      if (this.currentPlayingId === id) {
-        this.currentPlayingId = null;
-        this.currentAudio = null;
-        this.notify();
-      }
-    }
+    // Web Audio SFX are instant and synthesized directly via AudioContext!
   }
 
   // 1. ✨ Short Pleasant Ding / Success SFX (for selections, revealing answers, tapping 'بلدم')
@@ -461,15 +382,12 @@ class SoundEffects {
     this.playLevelComplete();
   }
 
-  // 🎓 Authentic Multiplication Table Narrator (strictly for educational tables in LearnView & ConceptView)
-  public speakTraditionalMultiplication(f1: number, f2: number, id?: string): void {
-    const audioId = id || `table-mult-${f1}-${f2}`;
-    const mp3Path = `/audio/multiplication/${f1}-${f2}.mp3`;
-    this.playMp3File(mp3Path, audioId, this.voiceVolume);
+  public speakTraditionalMultiplication(_f1: number, _f2: number, _id?: string): void {
+    // Audio files removed per request
+    this.playDing();
   }
 
-  public speakPersian(text: string, id: string = 'global-speech'): void {
-    // If not multiplication audio, stop or do soft ding
+  public speakPersian(_text: string, _id: string = 'global-speech'): void {
     this.playDing();
   }
 }

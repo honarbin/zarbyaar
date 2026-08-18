@@ -4,7 +4,6 @@ import confetti from 'canvas-confetti';
 import {
   Sparkles,
   Grid,
-  Volume2,
   HelpCircle,
   RotateCcw,
   CheckCircle2,
