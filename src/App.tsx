@@ -25,6 +25,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<AppView>('concept');
   const [userStats, setUserStats] = useState<UserStats>(loadUserStats());
   const [focusedTableForPractice, setFocusedTableForPractice] = useState<number | null>(null);
+  const [isGameSessionActive, setIsGameSessionActive] = useState<boolean>(false);
 
   // View keys to force remount of subview state when top-level nav is tapped
   const [viewKeys, setViewKeys] = useState<Record<AppView, number>>({
@@ -78,6 +79,7 @@ export default function App() {
     if (view !== 'speed') {
       setFocusedTableForPractice(null);
     }
+    setIsGameSessionActive(false);
     // Increment view key so any active subview/detail state resets to root
     setViewKeys((prev) => ({
       ...prev,
@@ -103,11 +105,13 @@ export default function App() {
     <div className="min-h-screen bg-amber-50/60 text-slate-800 font-['Estedad',sans-serif] selection:bg-amber-200 flex flex-col dir-rtl">
       
       {/* Header */}
-      <Header
-        stats={userStats}
-        onToggleSound={handleToggleSound}
-        onNavigate={handleNavigate}
-      />
+      {!isGameSessionActive && (
+        <Header
+          stats={userStats}
+          onToggleSound={handleToggleSound}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1">
@@ -142,6 +146,7 @@ export default function App() {
             stats={userStats}
             onUpdateStats={handleUpdateStats}
             onNavigateToLearn={() => handleNavigate('learn')}
+            onSessionActiveStateChange={setIsGameSessionActive}
           />
         )}
 
@@ -222,10 +227,12 @@ export default function App() {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav
-        currentView={currentView}
-        onNavigate={handleNavigate}
-      />
+      {!isGameSessionActive && (
+        <BottomNav
+          currentView={currentView}
+          onNavigate={handleNavigate}
+        />
+      )}
 
     </div>
   );

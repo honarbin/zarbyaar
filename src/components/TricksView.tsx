@@ -559,8 +559,8 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               <div>
                 <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${
                   activeTrick.category === 'always'
-                    ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                    : 'bg-amber-100 text-amber-900 border border-amber-300'
+                    ? 'bg-emerald-100 text-emerald-950 border border-emerald-300'
+                    : 'bg-amber-100 text-amber-950 border border-amber-300'
                 }`}>
                   {activeTrick.categoryLabel}
                 </span>
@@ -601,36 +601,52 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               ))}
             </div>
           </div>
-
-          {/* DEDICATED INTERACTIVE ELEMENTS FOR SPECIFIC TRICKS */}
           
           {/* 1. Interactive Finger Method for trick-9-fingers */}
           {activeTrick.id === 'trick-9-fingers' && (
-            <div className="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300 space-y-3 text-center">
+            <div className="bg-amber-50/50 p-6 rounded-[32px] border border-amber-200/60 space-y-5 text-center">
               <div className="text-xs font-black text-amber-950 flex items-center justify-center gap-1">
-                <Hand className="w-4 h-4 text-amber-600" />
-                <span>ابزار تعاملی انگشتان ضرب در ۹</span>
+                <Hand className="w-5 h-5 text-amber-600" />
+                <span className="text-sm">دستگاه جادویی ۱۰ انگشت کارتونی! 🖐️✨</span>
               </div>
-              <p className="text-[11px] text-slate-700 font-bold">
-                روی هر کدام از ۱۰ انگشت کلیک کن تا بخوابد و حاصل ضرب در ۹ را نشان دهد:
+              <p className="text-[11px] text-slate-500 font-bold max-w-xs mx-auto">
+                روی هر کدام از انگشت‌ها ضربه بزن تا بخوابد! انگشت‌های سمت چپ عدد دهگان و سمت راست یکان را می‌سازند!
               </p>
 
-              {/* 10 Interactive Fingers */}
-              <div className="flex justify-center gap-1.5 py-2">
+              {/* 10 Visual Cartoon Fingers */}
+              <div className="flex justify-center gap-1.5 md:gap-2.5 py-4 bg-white/90 rounded-3xl p-3 border border-amber-100 shadow-inner">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((fingerNum) => {
                   const isFolded = fingerNum === foldedFingerIndex;
+                  const isTens = fingerNum < foldedFingerIndex;
+                  const isOnes = fingerNum > foldedFingerIndex;
+
                   return (
                     <button
                       key={fingerNum}
-                      onClick={() => setFoldedFingerIndex(fingerNum)}
-                      className={`flex flex-col items-center p-1.5 rounded-xl transition-all cursor-pointer border-2 ${
+                      onClick={() => {
+                        setFoldedFingerIndex(fingerNum);
+                        sounds.playCorrectSound();
+                      }}
+                      className={`h-24 w-7 sm:w-9 rounded-full transition-all cursor-pointer relative flex flex-col justify-between p-1.5 border-2 active:scale-95 ${
                         isFolded
-                          ? 'bg-rose-500 text-white border-rose-600 scale-110 shadow-md'
-                          : 'bg-white text-slate-800 border-amber-300 hover:bg-amber-100'
+                          ? 'bg-slate-100 border-slate-300 text-slate-400 scale-90 shadow-inner'
+                          : isTens
+                          ? 'bg-gradient-to-t from-purple-500 to-indigo-400 text-white border-purple-600 shadow-md'
+                          : 'bg-gradient-to-t from-sky-500 to-cyan-400 text-white border-sky-600 shadow-md'
                       }`}
                     >
-                      <span className="text-lg">{isFolded} 👇 : 🖐️</span>
-                      <span className="text-[10px] font-black mt-1">
+                      {/* Finger Tip/Nail */}
+                      <div className={`w-3.5 h-3.5 rounded-full mx-auto ${
+                        isFolded ? 'bg-slate-300' : isTens ? 'bg-indigo-300' : 'bg-sky-200'
+                      }`} />
+
+                      {/* Finger status indicator inside capsule */}
+                      <span className="text-xs font-bold leading-none block my-auto">
+                        {isFolded ? '💤' : isTens ? '۱۰' : '۱'}
+                      </span>
+
+                      {/* Finger Number */}
+                      <span className="text-[9px] font-black leading-none block mx-auto py-0.5 px-1 bg-white/30 rounded-full">
                         {toPersianDigits(fingerNum)}
                       </span>
                     </button>
@@ -639,21 +655,29 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               </div>
 
               {/* Finger Method Result Breakdown */}
-              <div className="bg-white p-3 rounded-xl border border-amber-300 text-xs font-black text-slate-900 space-y-1">
-                <div className="text-amber-900 flex justify-center items-center gap-1">
-                  <span>ضرب:</span>
-                  <MathFormula factor1={9} factor2={foldedFingerIndex} className="text-amber-900" />
+              <div className="bg-white p-4 rounded-2xl border-2 border-amber-200 text-xs font-black text-slate-900 space-y-3 shadow-xs">
+                <div className="text-amber-900 flex justify-center items-center gap-1 text-sm bg-amber-50 px-3 py-1 rounded-full inline-block">
+                  <span>فرمول ضرب:</span>
+                  <MathFormula factor1={9} factor2={foldedFingerIndex} className="text-amber-900 font-black text-base" />
                 </div>
-                <div className="flex justify-center gap-4 text-xs pt-1">
-                  <span className="text-purple-700 bg-purple-50 px-2 py-1 rounded-lg border border-purple-200">
-                    انگشتان سمت چپ (دهگان): {toPersianDigits(foldedFingerIndex - 1)}
-                  </span>
-                  <span className="text-sky-700 bg-sky-50 px-2 py-1 rounded-lg border border-sky-200">
-                    انگشتان سمت راست (یکان): {toPersianDigits(10 - foldedFingerIndex)}
-                  </span>
+                
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="text-purple-900 bg-purple-50 p-2.5 rounded-xl border border-purple-100 flex flex-col items-center">
+                    <span className="text-[10px] text-slate-400 font-bold">سمت چپ (دهگان)</span>
+                    <span className="text-sm font-black mt-1">
+                      {toPersianDigits(foldedFingerIndex - 1)} انگشت = {toPersianDigits((foldedFingerIndex - 1) * 10)}
+                    </span>
+                  </div>
+                  <div className="text-sky-900 bg-sky-50 p-2.5 rounded-xl border border-sky-100 flex flex-col items-center">
+                    <span className="text-[10px] text-slate-400 font-bold">سمت راست (یکان)</span>
+                    <span className="text-sm font-black mt-1">
+                      {toPersianDigits(10 - foldedFingerIndex)} انگشت = {toPersianDigits(10 - foldedFingerIndex)}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-base text-emerald-600 font-black pt-1">
-                  حاصل ضرب = {toPersianDigits(9 * foldedFingerIndex)}
+
+                <div className="text-lg text-emerald-600 font-black pt-2 border-t border-slate-100">
+                  پاسخ جادویی ضرب = {toPersianDigits(9 * foldedFingerIndex)}
                 </div>
               </div>
 
@@ -662,33 +686,110 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
 
           {/* 2. Interactive Doubling Button for trick-2 */}
           {activeTrick.id === 'trick-2' && (
-            <div className="bg-sky-50 p-4 rounded-2xl border-2 border-sky-300 text-center space-y-3">
-              <div className="text-xs font-black text-sky-950">
-                دستگاه دو برابر کننده تعاملی:
+            <div className="bg-sky-50/50 p-6 rounded-[32px] border border-sky-200/60 text-center space-y-5">
+              <div className="text-xs font-black text-sky-950 flex items-center justify-center gap-1.5">
+                <span className="w-6 h-6 rounded-lg bg-sky-500 text-white flex items-center justify-center text-xs shadow-xs">🍩</span>
+                <span className="text-sm">کارخانه دوقلوساز دونات! 🏭🍩</span>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
+              {/* Number select controller */}
+              <div className="flex items-center justify-center gap-4">
                 <button
-                  onClick={() => setDoubleVal((prev) => Math.max(1, prev - 1))}
-                  className="w-9 h-9 rounded-xl bg-sky-200 text-sky-900 font-black text-base cursor-pointer"
+                  onClick={() => {
+                    if (doubleVal > 1) {
+                      setDoubleVal(doubleVal - 1);
+                      sounds.playCorrectSound();
+                    }
+                  }}
+                  disabled={doubleVal <= 1}
+                  className="w-10 h-10 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-black text-xl cursor-pointer transition-colors disabled:opacity-40"
                 >
                   -
                 </button>
-                <div className="text-2xl font-black text-sky-950 bg-white px-4 py-1.5 rounded-xl border border-sky-300">
+                <div className="text-2xl font-black text-sky-950 bg-white px-6 py-2 rounded-2xl border-2 border-sky-300 shadow-sm min-w-[80px]">
                   {toPersianDigits(doubleVal)}
                 </div>
                 <button
-                  onClick={() => setDoubleVal((prev) => Math.min(20, prev + 1))}
-                  className="w-9 h-9 rounded-xl bg-sky-200 text-sky-900 font-black text-base cursor-pointer"
+                  onClick={() => {
+                    if (doubleVal < 10) {
+                      setDoubleVal(doubleVal + 1);
+                      sounds.playCorrectSound();
+                    }
+                  }}
+                  disabled={doubleVal >= 10}
+                  className="w-10 h-10 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-black text-xl cursor-pointer transition-colors disabled:opacity-40"
                 >
                   +
                 </button>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-sky-200 font-black text-slate-900 text-sm text-center space-y-2">
-                <div className="flex flex-col items-center justify-center gap-1">
-                  <span className="text-xs text-slate-400 typo-caption">عبارت ریاضی دو برابر شدن</span>
-                  <MathExpression expression={`${doubleVal} × 2 = ${doubleVal} + ${doubleVal} = ${doubleVal * 2}`} size="normal" color="text-slate-900" />
+              {/* Dynamic Visual Conveyor Belt */}
+              <div className="bg-white/90 p-5 rounded-3xl border border-sky-100 shadow-inner space-y-4">
+                <div className="flex items-center justify-around gap-2">
+                  {/* Plate A */}
+                  <div className="text-center space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex-1">
+                    <span className="text-[10px] text-slate-400 font-bold">بشقاب اول</span>
+                    <div className="flex justify-center flex-wrap gap-0.5 text-xl min-h-[28px] items-center">
+                      {Array.from({ length: doubleVal }).map((_, idx) => (
+                        <motion.span
+                          key={idx}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="inline-block"
+                        >
+                          🍩
+                        </motion.span>
+                      ))}
+                    </div>
+                    <span className="text-xs font-black text-slate-700 block mt-1">{toPersianDigits(doubleVal)} تا</span>
+                  </div>
+
+                  <span className="text-xl font-black text-sky-500 shrink-0">+</span>
+
+                  {/* Plate B */}
+                  <div className="text-center space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex-1">
+                    <span className="text-[10px] text-slate-400 font-bold">بشقاب دوم</span>
+                    <div className="flex justify-center flex-wrap gap-0.5 text-xl min-h-[28px] items-center">
+                      {Array.from({ length: doubleVal }).map((_, idx) => (
+                        <motion.span
+                          key={idx}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="inline-block"
+                        >
+                          🍩
+                        </motion.span>
+                      ))}
+                    </div>
+                    <span className="text-xs font-black text-slate-700 block mt-1">{toPersianDigits(doubleVal)} تا</span>
+                  </div>
+                </div>
+
+                {/* Final delivery box */}
+                <div className="bg-gradient-to-r from-sky-500 to-indigo-500 p-4 rounded-2xl text-white text-center space-y-1 shadow-sm">
+                  <span className="text-[10px] text-sky-100 font-bold block">📦 جعبه تحویل نهایی کارخانه:</span>
+                  <div className="flex justify-center flex-wrap gap-1 text-2xl py-1">
+                    {Array.from({ length: doubleVal * 2 }).map((_, idx) => (
+                      <motion.span
+                        key={idx}
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.2, delay: idx * 0.05 }}
+                        className="inline-block"
+                      >
+                        🍩
+                      </motion.span>
+                    ))}
+                  </div>
+                  <span className="text-base font-black tracking-wide">
+                    {toPersianDigits(doubleVal)} + {toPersianDigits(doubleVal)} = {toPersianDigits(doubleVal * 2)} دونات خوشمزه! 😋
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-2xl border border-sky-100 font-black text-slate-900 text-sm">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[11px] text-slate-400 font-bold">فرمول ضرب دو برابر کردن:</span>
+                  <MathExpression expression={`${doubleVal} × ۲ = ${doubleVal * 2}`} size="large" color="text-sky-950 font-black" />
                 </div>
               </div>
 
@@ -697,31 +798,89 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
 
           {/* 3. Interactive Zero Appending for trick-10 */}
           {activeTrick.id === 'trick-10' && (
-            <div className="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-300 text-center space-y-3">
-              <div className="text-xs font-black text-emerald-950">
-                دستگاه اضافه کردن صفر 🚀
+            <div className="bg-slate-900 text-white p-6 rounded-[32px] border-4 border-slate-800 text-center space-y-5 relative overflow-hidden shadow-2xl">
+              
+              {/* Space Background Twinkling Effect */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/60 via-slate-900 to-slate-950 -z-10" />
+
+              <div className="text-xs font-black text-indigo-300 flex items-center justify-center gap-1.5">
+                <span className="text-xl">🚀🧑‍🚀</span>
+                <span className="text-sm">موشک فضایی صفرچسبان طلایی!</span>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-xs font-bold text-slate-700">عدد دلخواه:</span>
+
+              {/* Slider for input */}
+              <div className="space-y-1 bg-white/5 p-4 rounded-2xl border border-white/10">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                  <span>عدد خودت رو انتخاب کن:</span>
+                  <span className="text-amber-400 font-black text-base bg-white/10 px-2 py-0.5 rounded-lg">{toPersianDigits(zeroAppendVal)}</span>
+                </div>
                 <input
-                  type="number"
+                  type="range"
+                  min="1"
+                  max="20"
                   value={zeroAppendVal}
-                  onChange={(e) => setZeroAppendVal(parseInt(e.target.value, 10) || 1)}
-                  className="w-20 text-center py-1.5 px-2 rounded-xl border-2 border-emerald-400 font-black text-lg bg-white"
+                  onChange={(e) => {
+                    setZeroAppendVal(parseInt(e.target.value, 10));
+                    sounds.playCorrectSound();
+                  }}
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
                 />
               </div>
-              <div className="bg-white p-3 rounded-xl border border-emerald-300 text-sm font-black text-slate-900 flex items-center justify-center gap-2 math-expression" dir="ltr">
-                <MathFormula factor1={zeroAppendVal} factor2={10} />
-                <span>=</span>
-                <span className="text-emerald-600 text-xl font-black">{toPersianDigits(zeroAppendVal)}</span>
-                <motion.span
-                  animate={{ scale: [1, 1.4, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                  className="text-amber-500 text-2xl font-black bg-amber-100 px-2 rounded-lg border border-amber-300"
+
+              {/* Cosmic Rocket Visual representation */}
+              <div className="flex items-center justify-center gap-4 py-4 min-h-[100px]">
+                
+                {/* Rocket housing the number */}
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="bg-gradient-to-t from-rose-600 to-orange-500 p-4 rounded-2xl border-2 border-orange-400 text-white font-black text-2xl flex flex-col items-center relative shadow-lg min-w-[70px]"
                 >
+                  <span className="text-xs text-orange-200 font-bold block mb-1">موشک</span>
+                  {toPersianDigits(zeroAppendVal)}
+                  {/* Fire exhaust */}
+                  <span className="absolute -bottom-2 text-xs">🔥</span>
+                </motion.div>
+
+                <span className="text-2xl font-black text-slate-400">×</span>
+
+                {/* Astronaut Zero 0 */}
+                <motion.div
+                  animate={{
+                    x: [0, 8, 0],
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="bg-gradient-to-b from-sky-500 to-indigo-600 p-3.5 rounded-full border-2 border-sky-300 text-white font-black text-2xl flex flex-col items-center relative shadow-lg"
+                >
+                  <span className="absolute -top-3 text-[10px] bg-sky-200 text-slate-900 font-bold px-1.5 py-0.5 rounded-full border border-sky-400">🧑‍🚀 صفر</span>
                   ۰
-                </motion.span>
-                <span>= {toPersianDigits(zeroAppendVal * 10)}</span>
+                </motion.div>
+
+                <span className="text-2xl font-black text-slate-400">=</span>
+
+                {/* Combined final number */}
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-4 rounded-2xl border-2 border-emerald-400 text-slate-950 font-black text-2xl shadow-lg flex flex-col items-center min-w-[100px]">
+                  <span className="text-[10px] text-slate-900 font-bold block mb-1">پاسخ فضایی</span>
+                  <div className="flex items-center gap-0.5 font-black text-white">
+                    <span>{toPersianDigits(zeroAppendVal)}</span>
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                      className="text-amber-300 bg-emerald-700 px-2 rounded-lg border border-emerald-600 block"
+                    >
+                      ۰
+                    </motion.span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Dynamic Expression */}
+              <div className="bg-white/10 p-3 rounded-2xl border border-white/5 text-sm font-bold text-center">
+                <span className="text-amber-300 math-expression tracking-wider" dir="ltr">
+                  {toPersianDigits(zeroAppendVal)} × ۱۰ = {toPersianDigits(zeroAppendVal * 10)}
+                </span>
               </div>
 
             </div>
@@ -729,60 +888,235 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
 
           {/* 4. Interactive Double-Twice for trick-4 */}
           {activeTrick.id === 'trick-4' && (
-            <div className="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300 text-center space-y-3">
-              <div className="text-xs font-black text-amber-950">
-                دستگاه دو بار دو برابر کردن (ضرب در ۴):
+            <div className="bg-amber-50/50 p-6 rounded-[32px] border border-amber-200/60 text-center space-y-5">
+              <div className="text-xs font-black text-amber-950 flex items-center justify-center gap-1">
+                <span className="text-xl">⚡🤖</span>
+                <span className="text-sm">دستگاه دابل-دابل فانتزی (ضرب در ۴)</span>
               </div>
+
               <div className="flex items-center justify-center gap-3">
-                <span className="text-xs font-bold text-slate-700">عدد:</span>
+                <span className="text-xs font-black text-slate-600">عدد دلخواهت:</span>
                 <input
                   type="number"
+                  min="1"
+                  max="50"
                   value={doubleTwiceVal}
-                  onChange={(e) => setDoubleTwiceVal(parseInt(e.target.value, 10) || 1)}
-                  className="w-20 text-center py-1.5 px-2 rounded-xl border-2 border-amber-400 font-black text-lg bg-white"
+                  onChange={(e) => {
+                    setDoubleTwiceVal(Math.min(50, Math.max(1, parseInt(e.target.value, 10) || 1)));
+                    sounds.playCorrectSound();
+                  }}
+                  className="w-20 text-center py-2 px-3 rounded-2xl border-2 border-amber-400 font-black text-lg bg-white shadow-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs font-black">
-                <div className="bg-white p-2.5 rounded-xl border border-amber-200">
-                  <div className="text-amber-900">دو برابر اول (× ۲)</div>
-                  <div className="text-base text-slate-800 mt-1">{toPersianDigits(doubleTwiceVal * 2)}</div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Step 1 */}
+                <div className="bg-white p-4.5 rounded-2xl border border-amber-200 space-y-2 text-center shadow-xs">
+                  <span className="text-[10px] bg-amber-100 text-amber-900 font-black px-2.5 py-0.5 rounded-full">مرحله ۱: دو برابر کن</span>
+                  <div className="text-lg font-black text-slate-800">
+                    {toPersianDigits(doubleTwiceVal)} × ۲ = {toPersianDigits(doubleTwiceVal * 2)}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-bold">
+                    ({toPersianDigits(doubleTwiceVal)} به اضافه خودش)
+                  </div>
                 </div>
-                <div className="bg-amber-500 text-slate-950 p-2.5 rounded-xl border border-amber-600">
-                  <div className="text-slate-950">دو برابر دوم (× ۴)</div>
-                  <div className="text-base text-slate-950 font-black mt-1">{toPersianDigits(doubleTwiceVal * 4)}</div>
+
+                {/* Step 2 */}
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-4.5 rounded-2xl text-slate-950 space-y-2 text-center shadow-md">
+                  <span className="text-[10px] bg-white/40 text-slate-950 font-black px-2.5 py-0.5 rounded-full">مرحله ۲: دوباره دو برابر کن!</span>
+                  <div className="text-lg font-black text-slate-950">
+                    {toPersianDigits(doubleTwiceVal * 2)} × ۲ = {toPersianDigits(doubleTwiceVal * 4)}
+                  </div>
+                  <div className="text-[10px] text-slate-900/70 font-bold">
+                    (پاسخ قبلی به اضافه خودش)
+                  </div>
                 </div>
+
+              </div>
+
+              <div className="bg-white p-3.5 rounded-2xl border border-amber-200 text-xs font-black text-slate-900">
+                نتیجه نهایی ضرب: {toPersianDigits(doubleTwiceVal)} × ۴ = {toPersianDigits(doubleTwiceVal * 4)}
               </div>
             </div>
           )}
 
           {/* 5. Interactive Double-Three-Times for trick-8 */}
           {activeTrick.id === 'trick-8' && (
-            <div className="bg-purple-50 p-4 rounded-2xl border-2 border-purple-300 text-center space-y-3">
-              <div className="text-xs font-black text-purple-950">
-                دستگاه سه بار دو برابر کردن (ضرب در ۸):
+            <div className="bg-purple-50/50 p-6 rounded-[32px] border border-purple-200/60 text-center space-y-5">
+              <div className="text-xs font-black text-purple-950 flex items-center justify-center gap-1">
+                <span className="text-xl">🔥🦖</span>
+                <span className="text-sm">ماشین حساب سه گام دو برابرکن (ضرب در ۸)</span>
               </div>
+
               <div className="flex items-center justify-center gap-3">
-                <span className="text-xs font-bold text-slate-700">عدد اصلی:</span>
+                <span className="text-xs font-black text-slate-600">عدد دلخواهت:</span>
                 <input
                   type="number"
+                  min="1"
+                  max="30"
                   value={doubleThriceVal}
-                  onChange={(e) => setDoubleThriceVal(parseInt(e.target.value, 10) || 1)}
-                  className="w-20 text-center py-1.5 px-2 rounded-xl border-2 border-purple-400 font-black text-lg bg-white"
+                  onChange={(e) => {
+                    setDoubleThriceVal(Math.min(30, Math.max(1, parseInt(e.target.value, 10) || 1)));
+                    sounds.playCorrectSound();
+                  }}
+                  className="w-20 text-center py-2 px-3 rounded-2xl border-2 border-purple-400 font-black text-lg bg-white shadow-sm"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-1.5 text-xs font-black">
-                <div className="bg-white p-2 rounded-xl border border-purple-200">
-                  <div className="text-purple-800 text-[10px]">مرحله ۱ (× ۲)</div>
-                  <div className="text-sm text-slate-800 mt-0.5">{toPersianDigits(doubleThriceVal * 2)}</div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                
+                {/* G1 */}
+                <div className="bg-white p-3.5 rounded-2xl border border-purple-200 space-y-1">
+                  <span className="text-[9px] bg-purple-100 text-purple-900 font-black px-2 py-0.5 rounded-full">۱. ضرب در ۲</span>
+                  <div className="text-base font-black text-slate-800">{toPersianDigits(doubleThriceVal * 2)}</div>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-xl border border-purple-300">
-                  <div className="text-purple-900 text-[10px]">مرحله ۲ (× ۴)</div>
-                  <div className="text-sm text-slate-900 mt-0.5">{toPersianDigits(doubleThriceVal * 4)}</div>
+
+                {/* G2 */}
+                <div className="bg-purple-100/50 p-3.5 rounded-2xl border border-purple-300 space-y-1">
+                  <span className="text-[9px] bg-purple-200 text-purple-900 font-black px-2 py-0.5 rounded-full">۲. ضرب در ۴</span>
+                  <div className="text-base font-black text-slate-900">{toPersianDigits(doubleThriceVal * 4)}</div>
                 </div>
-                <div className="bg-purple-600 text-white p-2 rounded-xl border border-purple-700">
-                  <div className="text-purple-100 text-[10px]">مرحله ۳ (× ۸)</div>
-                  <div className="text-sm font-black mt-0.5">{toPersianDigits(doubleThriceVal * 8)}</div>
+
+                {/* G3 */}
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 p-3.5 rounded-2xl text-white space-y-1 shadow-sm">
+                  <span className="text-[9px] bg-white/20 text-white font-black px-2 py-0.5 rounded-full">۳. ضرب در ۸!</span>
+                  <div className="text-base font-black">{toPersianDigits(doubleThriceVal * 8)}</div>
                 </div>
+
+              </div>
+
+              <div className="bg-white p-3 rounded-xl border border-purple-100 text-xs font-black text-slate-700">
+                دیدی؟ سه بار به صورت زنجیره‌ای ضرب در ۲ کردیم ➔ {toPersianDigits(doubleThriceVal)} × ۸ = {toPersianDigits(doubleThriceVal * 8)}
+              </div>
+            </div>
+          )}
+
+          {/* 6. Interactive 11-Trick for trick-11 */}
+          {activeTrick.id === 'trick-11' && (
+            <div className="bg-indigo-50/50 p-6 rounded-[32px] border border-indigo-200/60 text-center space-y-5">
+              <div className="text-xs font-black text-indigo-950 flex items-center justify-center gap-1">
+                <span className="text-xl">🔮✨</span>
+                <span className="text-sm">دستگاه شعبده‌بازی ضرب در ۱۱!</span>
+              </div>
+
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xs font-black text-slate-600">عدد ۲ رقمی:</span>
+                <input
+                  type="number"
+                  min="10"
+                  max="99"
+                  value={elevenVal}
+                  onChange={(e) => {
+                    setElevenVal(Math.min(99, Math.max(10, parseInt(e.target.value, 10) || 10)));
+                    sounds.playCorrectSound();
+                  }}
+                  className="w-20 text-center py-2 px-3 rounded-2xl border-2 border-indigo-400 font-black text-lg bg-white shadow-sm"
+                />
+              </div>
+
+              {(() => {
+                const d1 = Math.floor(elevenVal / 10);
+                const d2 = elevenVal % 10;
+                const sum = d1 + d2;
+                return (
+                  <div className="bg-white p-5 rounded-3xl border border-indigo-100 text-xs font-black text-slate-900 text-center space-y-4 shadow-sm max-w-sm mx-auto">
+                    <div className="text-indigo-800 text-sm bg-indigo-50 px-3 py-1 rounded-full inline-block">
+                      تکنیک باز کردن ارقام:
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 text-2xl font-black py-2">
+                      <div className="bg-indigo-100 text-indigo-900 w-12 h-12 rounded-xl flex items-center justify-center border border-indigo-200">{toPersianDigits(d1)}</div>
+                      <span className="text-indigo-300">+</span>
+                      <div className="bg-pink-100 text-pink-900 w-12 h-12 rounded-xl flex items-center justify-center border border-pink-200">{toPersianDigits(d2)}</div>
+                      <span className="text-indigo-300">=</span>
+                      <div className="bg-amber-100 text-amber-900 w-12 h-12 rounded-xl flex items-center justify-center border border-amber-200">{toPersianDigits(sum)}</div>
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 font-bold leading-relaxed">
+                      رقم چپ عدد اول، رقم راست عدد دوم و مجموع دو رقم را درست در وسط آن‌ها بگذار!
+                    </p>
+
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-4 rounded-2xl text-white font-black text-lg shadow-inner">
+                      پاسخ = {toPersianDigits(d1)} ({toPersianDigits(sum)}) {toPersianDigits(d2)} ➔ <span className="text-amber-300 text-xl font-black">{toPersianDigits(elevenVal * 11)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* 7. Interactive Commutative Swap for trick-swap */}
+          {activeTrick.id === 'trick-swap' && (
+            <div className="bg-purple-50/50 p-6 rounded-[32px] border border-purple-200/60 text-center space-y-5">
+              <div className="text-xs font-black text-purple-950 flex items-center justify-center gap-1.5">
+                <span className="text-xl">🔄🍒</span>
+                <span className="text-sm">خاصیت جابه‌جایی ضرب (شیکر جادویی!)</span>
+              </div>
+
+              <div className="bg-white p-4 rounded-3xl border border-purple-100 shadow-inner space-y-4">
+                
+                {/* Visual Plates with cherries/bananas swapping */}
+                <div className="flex items-center justify-center gap-4 py-2 min-h-[70px]">
+                  <AnimatePresence mode="wait">
+                    {isSwapped ? (
+                      <motion.div
+                        key="swapped-plate"
+                        initial={{ x: -50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: 50, opacity: 0 }}
+                        className="flex items-center gap-2"
+                      >
+                        {/* Plate 1: 7 items */}
+                        <div className="bg-purple-100/80 px-3 py-2 rounded-2xl border-2 border-purple-300 text-center">
+                          <span className="text-[9px] font-black text-purple-900 block mb-1">۷ گروه</span>
+                          <span className="text-lg">🍒 🍒 🍒</span>
+                        </div>
+                        <span className="font-black text-purple-400">×</span>
+                        {/* Plate 2: 3 items */}
+                        <div className="bg-amber-100/80 px-3 py-2 rounded-2xl border-2 border-amber-300 text-center">
+                          <span className="text-[9px] font-black text-amber-900 block mb-1">۳ تا در هر کدام</span>
+                          <span className="text-lg">🍌 🍌 🍌 🍌 🍌 🍌 🍌</span>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="normal-plate"
+                        initial={{ x: 50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -50, opacity: 0 }}
+                        className="flex items-center gap-2"
+                      >
+                        {/* Plate 1: 3 items */}
+                        <div className="bg-amber-100/80 px-3 py-2 rounded-2xl border-2 border-amber-300 text-center">
+                          <span className="text-[9px] font-black text-amber-900 block mb-1">۳ گروه</span>
+                          <span className="text-lg">🍌 🍌 🍌 🍌 🍌 🍌 🍌</span>
+                        </div>
+                        <span className="font-black text-purple-400">×</span>
+                        {/* Plate 2: 7 items */}
+                        <div className="bg-purple-100/80 px-3 py-2 rounded-2xl border-2 border-purple-300 text-center">
+                          <span className="text-[9px] font-black text-purple-900 block mb-1">۷ تا در هر کدام</span>
+                          <span className="text-lg">🍒 🍒 🍒</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSwapped(!isSwapped);
+                    sounds.playCorrectSound();
+                  }}
+                  className="py-2.5 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl shadow-md font-black text-xs cursor-pointer flex items-center justify-center gap-1.5 mx-auto active:scale-95 transition-all"
+                >
+                  <span>🔄 تعویض جای بشقاب‌ها</span>
+                </button>
+              </div>
+
+              <div className="text-xs font-black text-emerald-800 bg-white p-3 rounded-xl border border-purple-100">
+                پاسخ هر دو جابه‌جایی دقیقاً برابر با حاصلِ طلایی است: {toPersianDigits(21)}! 🎉
               </div>
             </div>
           )}

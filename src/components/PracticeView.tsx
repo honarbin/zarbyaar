@@ -13,9 +13,15 @@ interface PracticeViewProps {
   stats: UserStats;
   onUpdateStats: (newStats: UserStats) => void;
   onNavigateToLearn: () => void;
+  onSessionActiveStateChange?: (isActive: boolean) => void;
 }
 
-export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats, onNavigateToLearn }) => {
+export const PracticeView: React.FC<PracticeViewProps> = ({
+  stats,
+  onUpdateStats,
+  onNavigateToLearn,
+  onSessionActiveStateChange,
+}) => {
   // State for game flow
   const [level, setLevel] = useState<DifficultyLevel | null>(null);
   const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -39,9 +45,20 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
 
   const weaknesses = getWeaknessList(stats);
 
+  // Exit practice session
+  const exitSession = () => {
+    setLevel(null);
+    if (onSessionActiveStateChange) {
+      onSessionActiveStateChange(false);
+    }
+  };
+
   // Start new practice session
   const startPractice = (selectedLevel: DifficultyLevel) => {
     setLevel(selectedLevel);
+    if (onSessionActiveStateChange) {
+      onSessionActiveStateChange(true);
+    }
     setQuestionIndex(0);
     setSessionScore(0);
     setCorrectCount(0);
@@ -440,7 +457,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
             </button>
 
             <button
-              onClick={() => setLevel(null)}
+              onClick={exitSession}
               className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold py-3.5 px-4 rounded-2xl border-2 border-slate-300 flex items-center justify-center gap-2 cursor-pointer transition-colors"
             >
               <ArrowRight className="w-5 h-5" />
@@ -455,51 +472,51 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
 
   // Active Practice Question Screen
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 pb-24 space-y-5">
+    <div className="max-w-2xl mx-auto px-6 py-8 space-y-8 flex flex-col justify-center min-h-[calc(100vh-5rem)]">
       
-      {/* Top Practice Bar: Progress, Question Counter, Streak */}
-      <div className="bg-white rounded-2xl p-3 shadow-md border-2 border-amber-200 flex items-center justify-between">
+      {/* Top Practice Bar: Minimalist & Borderless */}
+      <div className="flex items-center justify-between px-2">
         
         {/* Back Button */}
         <button
-          onClick={() => setLevel(null)}
-          className="text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 px-2.5 py-1.5 rounded-xl cursor-pointer"
+          onClick={exitSession}
+          className="text-sm font-black text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200/80 px-4 py-2 rounded-2xl cursor-pointer transition-colors"
         >
           انصراف
         </button>
 
         {/* Question Counter */}
-        <div className="flex items-center gap-1 bg-amber-100 px-3 py-1 rounded-xl text-amber-900 font-black text-sm">
-          <span>سؤال</span>
-          <span>{toPersianDigits(questionIndex + 1)}</span>
-          <span>از ۱۰</span>
+        <div className="text-slate-600 font-black text-lg">
+          <span>سؤال </span>
+          <span className="text-amber-500 text-2xl">{toPersianDigits(questionIndex + 1)}</span>
+          <span className="text-slate-400"> / ۱۰</span>
         </div>
 
         {/* Streak Indicator */}
-        <div className="flex items-center gap-1 text-orange-600 font-black text-sm">
+        <div className="flex items-center gap-2 bg-orange-50 border border-orange-100 px-4 py-2 rounded-full text-orange-600 font-black text-sm">
           <Flame className={`w-5 h-5 fill-orange-500 ${currentStreak > 0 ? 'animate-bounce' : 'opacity-40'}`} />
           <span>{toPersianDigits(currentStreak)}</span>
         </div>
 
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
+      {/* Modern, clean progress bar */}
+      <div className="w-full bg-slate-200/70 h-3 rounded-full overflow-hidden">
         <div
           className="bg-gradient-to-r from-amber-400 to-orange-500 h-full transition-all duration-300 rounded-full"
           style={{ width: `${((questionIndex + 1) / 10) * 100}%` }}
         />
       </div>
 
-      {/* Question Card */}
+      {/* Hero Question Card (Minimalist premium style) */}
       <motion.div
         key={questionIndex}
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-amber-300 space-y-6 relative overflow-hidden"
+        className="bg-white rounded-[32px] p-8 md:p-12 text-center shadow-xl border border-slate-100 space-y-8 relative overflow-hidden"
       >
-        {/* Dynamic Interactive Character Companion (Rule 2) */}
-        <div className="flex justify-center -mt-2 pb-1">
+        {/* Dynamic Interactive Character Companion */}
+        <div className="flex justify-center -mt-4 pb-2">
           <GameCharacter
             characterId={(stats.avatar as any) || 'fox'}
             expression={
@@ -513,34 +530,29 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
                 ? 'thinking'
                 : 'idle'
             }
-            size="md"
+            size="lg"
           />
         </div>
 
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          پاسخ صحیح را انتخاب کن
-        </p>
-
-        {/* Question Numbers Prompt */}
-        <div className="py-4 bg-amber-50 rounded-2xl border-2 border-amber-200/80 shadow-inner flex justify-center items-center">
+        {/* Huge Display Question Container */}
+        <div className="py-10 bg-slate-50/80 rounded-3xl flex justify-center items-center shadow-inner">
           <MathFormula
             factor1={currentQuestion?.factor1 ?? 1}
             factor2={currentQuestion?.factor2 ?? 1}
             answer="؟"
-            className="text-slate-900 tracking-wider"
+            className="text-slate-900 tracking-wider font-black"
             symbolColor="text-amber-500"
             size="display"
           />
         </div>
 
-
-        {/* Multiple Choice Options Grid */}
-        <div className="grid grid-cols-2 gap-3.5 pt-2">
+        {/* Large Playful Touch Target Options Grid */}
+        <div className="grid grid-cols-2 gap-4 pt-2">
           {currentQuestion?.options.map((option, idx) => {
             const isSelected = selectedOption === option;
             const isCorrect = option === currentQuestion.answer;
 
-            let btnStyle = 'bg-slate-50 hover:bg-amber-100 text-slate-900 border-slate-200 shadow';
+            let btnStyle = 'bg-slate-50 hover:bg-amber-50 text-slate-800 border-slate-200/80 hover:border-amber-200 shadow-sm';
 
             if (isAnswered) {
               if (isCorrect) {
@@ -548,7 +560,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
               } else if (isSelected && !isCorrect) {
                 btnStyle = 'bg-rose-500 text-white border-rose-600 shadow-md';
               } else {
-                btnStyle = 'bg-slate-100 text-slate-400 border-slate-200 opacity-60';
+                btnStyle = 'bg-slate-100/50 text-slate-400 border-transparent opacity-40';
               }
             }
 
@@ -557,11 +569,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
                 key={idx}
                 disabled={isAnswered}
                 onClick={() => handleSelectOption(option)}
-                className={`py-4 px-4 rounded-2xl typo-math-large border-b-4 transition-all duration-200 cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${btnStyle}`}
+                className={`py-6 px-6 rounded-2xl text-3xl font-black border-b-4 transition-all duration-200 cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${btnStyle}`}
               >
                 <span>{toPersianDigits(option)}</span>
-                {isAnswered && isCorrect && <CheckCircle2 className="w-5 h-5 text-white" />}
-                {isAnswered && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-white" />}
+                {isAnswered && isCorrect && <CheckCircle2 className="w-6 h-6 text-white" />}
+                {isAnswered && isSelected && !isCorrect && <XCircle className="w-6 h-6 text-white" />}
               </button>
             );
           })}
@@ -571,18 +583,18 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
         <AnimatePresence>
           {feedback && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`p-4 rounded-2xl border-2 font-black text-base flex flex-col items-center justify-center gap-1 ${
+              className={`p-5 rounded-2xl border-2 font-black text-lg flex flex-col items-center justify-center gap-1.5 ${
                 feedback.isCorrect
-                  ? 'bg-emerald-100 border-emerald-300 text-emerald-900'
-                  : 'bg-rose-100 border-rose-300 text-rose-900'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  : 'bg-rose-50 border-rose-200 text-rose-900'
               }`}
             >
               <span>{feedback.message}</span>
               {!feedback.isCorrect && (
-                <span className="text-xs font-bold text-rose-700 flex items-center gap-1">
+                <span className="text-sm font-bold text-rose-700 flex items-center gap-1">
                   پاسخ صحیح:{' '}
                   <MathFormula
                     factor1={currentQuestion?.factor1 ?? 1}
@@ -594,7 +606,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
               )}
 
               {feedback.pointsEarned > 0 && (
-                <span className="text-xs bg-emerald-200 text-emerald-900 font-extrabold px-2.5 py-0.5 rounded-full mt-1">
+                <span className="text-xs bg-emerald-200/70 text-emerald-900 font-black px-3.5 py-1 rounded-full mt-2">
                   +{toPersianDigits(feedback.pointsEarned)} امتیاز 🎉
                 </span>
               )}
@@ -608,7 +620,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             onClick={handleNextQuestion}
-            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4 px-6 rounded-2xl shadow-lg border-b-4 border-amber-600 text-lg flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-98"
+            className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4.5 px-6 rounded-2xl shadow-lg border-b-4 border-amber-600 text-xl flex items-center justify-center gap-2 cursor-pointer transition-transform active:scale-98"
           >
             <span>{questionIndex + 1 === 10 ? 'مشاهده نتیجه' : 'سؤال بعدی'}</span>
             <ArrowRight className="w-5 h-5" />

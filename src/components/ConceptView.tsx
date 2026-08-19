@@ -62,6 +62,9 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
   // --- Sub-Tab 1 State: Lessons & Commutativity Toggle ---
   const [commutativityOrder, setCommutativityOrder] = useState<'3x4' | '4x3'>('3x4');
   const [selectedStep, setSelectedStep] = useState<number>(1);
+  const [labGroups, setLabGroups] = useState<number>(3);
+  const [labItemsPerGroup, setLabItemsPerGroup] = useState<number>(4);
+  const [labEmoji, setLabEmoji] = useState<string>('🍎');
 
   // --- Sub-Tab 2 State: Make Groups Game ---
   const [makeGroupIndex, setMakeGroupIndex] = useState<number>(0);
@@ -397,122 +400,208 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
       {activeTab === 'lessons' && (
         <div className="space-y-6">
           
-          {/* Card 1: Main Concept (3 x 4 Example) */}
-          <div className="bg-white rounded-3xl p-5 border-2 border-amber-300 shadow-md space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-amber-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-sm">
-                  ۱
+          {/* Card 1: Live Interactive Multiplication Lab */}
+          <div className="bg-white rounded-[32px] p-6 md:p-8 border border-slate-100 shadow-lg space-y-6">
+            <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-lg shadow-md">
+                  🧪
                 </span>
-                <h3 className="text-lg font-black text-slate-900">
-                  ضرب همان «جمع تکراری» است!
-                </h3>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    آزمایشگاه زنده ضرب فانتزی!
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-bold">
+                    خودت مقادیر رو عوض کن و زنده تماشا کن!
+                  </p>
+                </div>
               </div>
             </div>
 
-            <p className="text-xs text-slate-700 leading-relaxed font-bold">
-              وقتی با عبارت <strong className="text-amber-700 text-sm">۳ × ۴</strong> مواجه می‌شویم، یعنی:
-              <br />
-              «۳ گروه داریم و در هر گروه ۴ تاست.»
-            </p>
-
-            {/* Visual Apple Groups */}
-            <div className="bg-amber-50/80 p-4 rounded-2xl border-2 border-amber-200 space-y-3">
-              <div className="text-xs font-black text-slate-800 text-center">
-                نمایش تصویری گروه‌بندی:
-              </div>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                {[1, 2, 3].map((g) => (
-                  <div key={g} className="bg-white p-3 rounded-2xl border-2 border-amber-300 shadow-sm text-center space-y-1.5">
-                    <span className="text-[11px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full inline-block">
-                      گروه {toPersianDigits(g)}
-                    </span>
-                    <div className="flex justify-center flex-wrap gap-1 text-lg">
-                      🍎 🍎 🍎 🍎
-                    </div>
-                    <span className="text-xs font-black text-slate-600">۴ تا</span>
-                  </div>
+            {/* Custom Emoji Selector Tabs */}
+            <div className="space-y-2">
+              <span className="text-xs font-black text-slate-600">۱. خوراکی دلخواهت رو انتخاب کن:</span>
+              <div className="grid grid-cols-5 gap-2">
+                {[
+                  { emoji: '🍎', label: 'سیب' },
+                  { emoji: '🍩', label: 'دونات' },
+                  { emoji: '⭐', label: 'ستاره' },
+                  { emoji: '🍬', label: 'شکلات' },
+                  { emoji: '🦆', label: 'اردک' },
+                ].map((item) => (
+                  <button
+                    key={item.emoji}
+                    onClick={() => {
+                      setLabEmoji(item.emoji);
+                      sounds.playCorrectSound();
+                    }}
+                    className={`p-2 rounded-2xl text-center border-2 transition-all cursor-pointer flex flex-col items-center gap-1 active:scale-95 ${
+                      labEmoji === item.emoji
+                        ? 'bg-amber-100 border-amber-400 text-slate-950 shadow-sm scale-102'
+                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200/80 text-slate-500'
+                    }`}
+                  >
+                    <span className="text-2xl">{item.emoji}</span>
+                    <span className="text-[10px] font-black">{item.label}</span>
+                  </button>
                 ))}
               </div>
+            </div>
 
-              <div className="bg-white p-3 rounded-2xl border border-amber-200 text-center font-black text-amber-900 text-sm shadow-xs">
-                ۳ گروه ۴‌تایی = {toPersianDigits(12)}
+            {/* Controllers Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Group controller */}
+              <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 space-y-2.5">
+                <span className="text-xs font-black text-slate-600 block">۲. تعداد گروه‌ها (بشقاب‌ها):</span>
+                <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
+                  <button
+                    onClick={() => {
+                      if (labGroups > 1) {
+                        setLabGroups(labGroups - 1);
+                        sounds.playCorrectSound();
+                      }
+                    }}
+                    disabled={labGroups <= 1}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="text-xl font-black text-slate-800">{toPersianDigits(labGroups)} بشقاب</span>
+                  <button
+                    onClick={() => {
+                      if (labGroups < 5) {
+                        setLabGroups(labGroups + 1);
+                        sounds.playCorrectSound();
+                      }
+                    }}
+                    disabled={labGroups >= 5}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Items controller */}
+              <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 space-y-2.5">
+                <span className="text-xs font-black text-slate-600 block">۳. تعداد در هر بشقاب:</span>
+                <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
+                  <button
+                    onClick={() => {
+                      if (labItemsPerGroup > 1) {
+                        setLabItemsPerGroup(labItemsPerGroup - 1);
+                        sounds.playCorrectSound();
+                      }
+                    }}
+                    disabled={labItemsPerGroup <= 1}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="text-xl font-black text-slate-800">{toPersianDigits(labItemsPerGroup)} تا</span>
+                  <button
+                    onClick={() => {
+                      if (labItemsPerGroup < 5) {
+                        setLabItemsPerGroup(labItemsPerGroup + 1);
+                        sounds.playCorrectSound();
+                      }
+                    }}
+                    disabled={labItemsPerGroup >= 5}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-lg flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Dynamic Plates Visualizer */}
+            <div className="bg-amber-50/50 p-6 rounded-3xl border border-amber-100 space-y-4">
+              <div className="text-center">
+                <span className="text-xs bg-amber-100 text-amber-900 font-black px-4 py-1.5 rounded-full inline-block">
+                  {toPersianDigits(labGroups)} گروه {toPersianDigits(labItemsPerGroup)}‌تایی
+                </span>
+              </div>
+
+              {/* Bouncing items on plates */}
+              <div className="flex flex-wrap gap-4 items-center justify-center">
+                {Array.from({ length: labGroups }).map((_, pIdx) => (
+                  <motion.div
+                    key={pIdx}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 100 }}
+                    className="bg-white p-4 rounded-2xl border-2 border-amber-300 shadow-sm text-center space-y-2 min-w-[100px] flex-1 max-w-[160px]"
+                  >
+                    <span className="text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full inline-block">
+                      بشقاب {toPersianDigits(pIdx + 1)}
+                    </span>
+                    
+                    {/* Bouncing items container */}
+                    <div className="flex justify-center flex-wrap gap-1 text-2xl py-1 min-h-[36px]">
+                      {Array.from({ length: labItemsPerGroup }).map((_, itemIdx) => (
+                        <motion.span
+                          key={itemIdx}
+                          animate={{
+                            y: [0, -4, 0],
+                          }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            delay: itemIdx * 0.1 + pIdx * 0.05,
+                          }}
+                          className="inline-block cursor-pointer hover:scale-130 transition-transform"
+                        >
+                          {labEmoji}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
-            {/* Addition to Multiplication Transformation */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 rounded-3xl text-slate-950 font-black text-center space-y-4 shadow-sm">
-              <div className="text-sm text-slate-900 typo-h3">ضرب یعنی جمع تکراری!</div>
-              <div className="text-xs text-slate-800 typo-body bg-amber-100/60 inline-block px-3 py-1 rounded-full">۳ گروه ۴تایی داریم.</div>
+            {/* Dynamic Equations Board */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-3xl text-slate-950 font-black text-center space-y-4 shadow-md">
+              <div className="text-sm text-slate-900 font-black">ضرب یعنی خلاصه کردن جمع تکراری!</div>
               
-              <div className="flex flex-col items-center gap-3 bg-white/95 p-4 rounded-2xl shadow-inner">
-                <div className="text-xs text-slate-500 typo-caption">جمع تکراری</div>
-                <MathExpression expression="4 + 4 + 4 = 12" size="large" color="text-amber-950" symbolColor="text-amber-500" />
+              <div className="flex flex-col items-center gap-3.5 bg-white p-5 rounded-2xl shadow-inner animate-fade-in">
+                <div className="text-xs text-slate-400 font-bold">جمع تکراری خوراکی‌ها:</div>
+                <MathExpression
+                  expression={`${Array(labGroups).fill(labItemsPerGroup).join(' + ')} = ${labGroups * labItemsPerGroup}`}
+                  size="large"
+                  color="text-amber-950 font-black"
+                  symbolColor="text-amber-500"
+                />
                 
-                <div className="text-xl text-amber-600 font-bold">↓</div>
+                <div className="text-xl text-amber-500 font-black">↓</div>
                 
-                <div className="text-xs text-slate-500 typo-caption">عبارت ضرب</div>
-                <MathExpression expression="3 × 4 = 12" size="large" color="text-slate-950" symbolColor="text-amber-600" />
+                <div className="text-xs text-slate-400 font-bold">فرمول ضرب فانتزی:</div>
+                <MathExpression
+                  expression={`${labGroups} × ${labItemsPerGroup} = ${labGroups * labItemsPerGroup}`}
+                  size="large"
+                  color="text-slate-950 font-black"
+                  symbolColor="text-amber-600"
+                />
               </div>
 
-              {/* Character speech bubble (Rule 8) */}
-              <div className="bg-amber-50/90 p-3 rounded-2xl border border-amber-200/80 flex items-center gap-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-xl p-1 shrink-0">
+              {/* Character dynamic feedback bubble */}
+              <div className="bg-amber-50/90 p-4.5 rounded-2xl border border-amber-200/80 flex items-center gap-3">
+                <div className="w-14 h-14 flex items-center justify-center bg-white rounded-2xl p-1 shrink-0 shadow-sm">
                   <GameCharacter
                     characterId={(stats.avatar as any) || 'fox'}
                     expression="cheering"
                     size="sm"
                   />
                 </div>
-                <div className="text-[11px] text-slate-800 font-extrabold text-right leading-relaxed">
-                  «دیدی؟ ضرب کمک میکنه جمع‌های تکراری رو خیلی سریع‌تر و راحت‌تر بنویسیم!» 🚀✨
+                <div className="text-xs text-slate-800 font-extrabold text-right leading-relaxed">
+                  «دیدی دوست من؟ به‌جای اینکه {toPersianDigits(labGroups)} بار عدد {toPersianDigits(labItemsPerGroup)} رو با هم جمع کنی، خیلی راحت با یک ضرب ساده حسابش کردی!» 🎉✨
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Card 2: Equal Groups Example (Plates & Apples Story) */}
-          <div className="bg-white rounded-3xl p-5 border-2 border-sky-300 shadow-md space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-sky-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-sky-500 text-white font-black flex items-center justify-center text-sm shadow-sm">
-                  ۲
-                </span>
-                <h3 className="text-lg font-black text-slate-900">
-                  آموزش «گروه‌های مساوی»
-                </h3>
-              </div>
-            </div>
-
-            <div className="bg-sky-50/80 p-3.5 rounded-2xl border border-sky-200 text-xs font-bold text-slate-800 leading-relaxed">
-              مثال واقعی: «اگر <strong className="text-sky-700">۴ بشقاب</strong> داشته باشیم و داخل هر بشقاب <strong className="text-sky-700">۳ سیب</strong> باشد، چند سیب داریم؟»
-            </div>
-
-            {/* 4 Plates Representation */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((p) => (
-                <div key={p} className="bg-sky-100/80 p-3 rounded-2xl border-2 border-sky-300 text-center space-y-1">
-                  <span className="text-[10px] font-black text-sky-900 bg-white px-2 py-0.5 rounded-full">
-                    بشقاب {toPersianDigits(p)}
-                  </span>
-                  <div className="text-lg py-1">🍎 🍎 🍎</div>
-                  <span className="text-xs font-black text-slate-700">۳ سیب</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center gap-4 bg-slate-900 text-white p-5 rounded-2xl text-center shadow-lg">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-xs text-sky-400 font-semibold typo-caption">جمع تکراری</span>
-                <MathExpression expression="3 + 3 + 3 + 3 = 12" size="large" color="text-sky-200" symbolColor="text-sky-400" />
-              </div>
-              <div className="w-full border-t border-slate-800 my-1"></div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-xs text-amber-400 font-semibold typo-caption">عبارت ضرب</span>
-                <MathExpression expression="4 × 3 = 12" size="large" color="text-amber-300" symbolColor="text-amber-400" />
-              </div>
-            </div>
           </div>
 
           {/* Card 3: Order of Multiplication & Commutativity */}
